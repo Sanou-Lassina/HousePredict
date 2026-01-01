@@ -228,13 +228,13 @@ def main():
     # Sidebar - Navigation professionnelle
     with st.sidebar:
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        IMAGE_PATH = os.path.join(BASE_DIR, "assets", "Architecture.png")
+        IMAGE_PATH = os.path.join(BASE_DIR, "assets", "architecture.png")
 
         with st.sidebar:
             if os.path.exists(IMAGE_PATH):
                 st.image(IMAGE_PATH, width=600)
             else:
-                st.error("❌ Image Architecture.png introuvable")
+                st.error("❌ Image architecture.png introuvable")
         
         # En-tête de la sidebar
         st.markdown("# 🏢 HousePredict")
