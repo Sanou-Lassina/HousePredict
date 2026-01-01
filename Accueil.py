@@ -227,10 +227,12 @@ st.markdown("""
 def main():
     # Sidebar - Navigation professionnelle
     with st.sidebar:
-        st.image(
-            "Architecture.png",
-            width=600,
-        )
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        IMAGE_PATH = os.path.join(BASE_DIR, "assets", "Architecture.png")
+
+        with st.sidebar:
+            st.image(IMAGE_PATH, width=600)
+        
         # En-tête de la sidebar
         st.markdown("# 🏢 HousePredict")
         
