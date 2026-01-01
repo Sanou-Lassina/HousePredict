@@ -231,7 +231,10 @@ def main():
         IMAGE_PATH = os.path.join(BASE_DIR, "assets", "Architecture.png")
 
         with st.sidebar:
-            st.image(IMAGE_PATH, width=600)
+            if os.path.exists(IMAGE_PATH):
+                st.image(IMAGE_PATH, width=600)
+            else:
+                st.error("❌ Image Architecture.png introuvable")
         
         # En-tête de la sidebar
         st.markdown("# 🏢 HousePredict")
