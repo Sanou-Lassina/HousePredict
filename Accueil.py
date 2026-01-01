@@ -228,7 +228,7 @@ def main():
     # Sidebar - Navigation professionnelle
     with st.sidebar:
         st.image(
-            "D:/Projets/Projet_Maison/Application/Architecture.png",
+            "Architecture.png",
             width=600,
         )
         # En-tête de la sidebar
