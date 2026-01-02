@@ -8,3 +8,4 @@ matplotlib
 joblib
 scipy
 openpyxl
+seaborn
