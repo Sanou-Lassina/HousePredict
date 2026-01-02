@@ -228,7 +228,7 @@ def create_horizontal_navigation():
 
 def analyze_target_variable(df):
     """Analyse approfondie de la variable cible SalePrice"""
-    st.markdown("<div class='section-card'><h2>🎯 Analyse Approfondie de la Variable Cible</h2></div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-card'><h3>🎯 Analyse Approfondie de la Variable Cible</h3></div>", unsafe_allow_html=True)
     
     # Métriques statistiques avancées
     col1, col2, col3, col4 = st.columns(4)
