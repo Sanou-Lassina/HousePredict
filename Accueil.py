@@ -492,7 +492,7 @@ def show_homepage():
     """, unsafe_allow_html=True)
     
     # Section fonctionnalités avec descriptions détaillées
-    st.markdown("<h2 class='section-title'>✨ Fonctionnalités Premium</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-title'>✨ Fonctionnalités</h2>", unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
@@ -588,7 +588,7 @@ def show_homepage():
     
     # Section base de données avancée
     st.markdown("<div class='styled-divider'></div>", unsafe_allow_html=True)
-    st.markdown("<h2 class='section-title'>🏗️ Architecture de la Base de Données</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-title'>🏗️ Architecture des Données</h2>", unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     
@@ -636,7 +636,7 @@ def show_homepage():
     
     # Section workflow professionnel
     st.markdown("<div class='styled-divider'></div>", unsafe_allow_html=True)
-    st.markdown("<h2 class='section-title'>🎯 Workflow Professionnel</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='section-title'>🎯 Workflow</h2>", unsafe_allow_html=True)
     
     steps = [
         {
