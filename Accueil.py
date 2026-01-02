@@ -227,12 +227,9 @@ st.markdown("""
 def main():
     # Sidebar - Navigation professionnelle
     with st.sidebar:
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        IMAGE_PATH = os.path.join(BASE_DIR, "assets", "architecture.png")
-
         with st.sidebar:
-            if os.path.exists(IMAGE_PATH):
-                st.image(IMAGE_PATH, width=600)
+            if os.path.exists("architecture.png"):
+                st.image("architecture.png", width=600)
             else:
                 st.error("❌ Image architecture.png introuvable")
         
