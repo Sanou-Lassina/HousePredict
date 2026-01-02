@@ -25,10 +25,10 @@ def sanitize_df_for_plotly(df):
 @st.cache_data(show_spinner=False)
 def load_dataset():
     """Charge et prépare le dataset immobilier."""
-    train = pd.read_csv("D:/Projets/Projet_Maison/Application/train.csv",
+    train = pd.read_csv("train.csv",
                         sep=';', encoding='utf-8', on_bad_lines='warn')
-    test = pd.read_csv("D:/Projets/Projet_Maison/Application/test.csv",
-                       sep=';', encoding='utf-8', on_bad_lines='warn')
+    test = pd.read_csv("test.csv",
+                    sep=';', encoding='utf-8', on_bad_lines='warn')
     
     # Fusion des données train et test
     df = pd.concat([train, test], axis=0, ignore_index=True)
@@ -488,7 +488,7 @@ def main():
         
         # Filtrage des variables numériques (exclure SalePrice et binaires)
         numeric_features = [col for col in df.select_dtypes(include=[np.number]).columns 
-                          if col != 'SalePrice']
+                        if col != 'SalePrice']
         
         # Détection des variables binaires (0/1)
         binary_features = []
