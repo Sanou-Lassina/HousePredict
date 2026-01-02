@@ -567,7 +567,7 @@ def show_best_practices():
     workflow_steps = [
         ("1. Exploration", "Page Données - Comprenez la structure de vos données"),
         ("2. Analyse", "Page Analyse - Identifiez les patterns et relations"),
-        ("3. Modélisation", "Page Modélisation - Utilisez les prédictions IA"),
+        ("3. Modélisation", "Page Modélisation - Utilisez les prédictions ML"),
         ("4. Validation", "Analysez les résidus et métriques de performance")
     ]
     
@@ -593,7 +593,7 @@ def show_best_practices():
         "Ne pas ignorer l'analyse des résidus",
         "Éviter de surinterpréter les corrélations faibles",
         "Ne pas utiliser le modèle en dehors de ses plages d'entraînement",
-        "Éviter de prendre des décisions basées uniquement sur les prédictions IA"
+        "Éviter de prendre des décisions basées uniquement sur les prédictions ML"
     ]
     
     for warning in warnings:
@@ -605,42 +605,6 @@ def show_troubleshooting():
         <h2>🔧 Dépannage et Support Technique</h2>
     </div>
     """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    ### ❌ Problèmes Courants et Solutions
-    """)
-    
-    problems_solutions = [
-        {
-            "problem": "L'application ne se lance pas",
-            "solution": "Vérifiez que toutes les dépendances sont installées (pip install -r requirements.txt)",
-            "code": "streamlit run Accueil.py"
-        },
-        {
-            "problem": "Graphiques non affichés",
-            "solution": "Vérifiez votre connexion internet (Plotly charge des ressources en ligne)",
-            "code": ""
-        },
-        {
-            "problem": "Erreurs de chargement des données",
-            "solution": "Vérifiez le format et l'emplacement de votre fichier de données",
-            "code": "df = pd.read_csv('votre_fichier.csv')"
-        },
-        {
-            "problem": "Performances lentes",
-            "solution": "Réduisez la taille du dataset ou utilisez un échantillon",
-            "code": "df_sample = df.sample(1000)"
-        }
-    ]
-    
-    for item in problems_solutions:
-        st.markdown(f"**{item['problem']}**")
-        st.markdown(f"🔧 {item['solution']}")
-        if item['code']:
-            st.code(item['code'], language='python')
-        st.markdown("---")
-    
-    st.subheader("📞 Support Technique")
     
     st.markdown("""
     En cas de problème persistant :
