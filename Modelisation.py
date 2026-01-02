@@ -91,7 +91,7 @@ def load_model():
     try:
         # Essayer plusieurs chemins possibles
         possible_paths = [
-            Path("D:/Projets/Projet_Maison/Application/xgboost_model.pkl"),
+            Path("xgboost_model.pkl"),
         ]
         
         model = None

@@ -145,9 +145,9 @@ st.markdown("""
 
 @st.cache_data
 def load_dataset():
-    train = pd.read_csv("D:/Projets/Projet_Maison/Application/train.csv",
+    train = pd.read_csv("train.csv",
                         sep=';', encoding='utf-8', on_bad_lines='warn')
-    test  = pd.read_csv("D:/Projets/Projet_Maison/Application/test.csv",
+    test  = pd.read_csv("test.csv",
                         sep=';', encoding='utf-8', on_bad_lines='warn')
     
     df = pd.concat([train, test], axis=0, ignore_index=True)

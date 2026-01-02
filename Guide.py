@@ -156,7 +156,7 @@ def show_introduction():
     
     with col2:
         st.image(
-        "D:/Projets/Projet_Maison/Application/Architecture.png",
+        "architecture.png",
         caption="Architecture de l'Application",
         use_container_width=True
     )

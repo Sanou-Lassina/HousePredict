@@ -639,7 +639,7 @@ def main():
         st.markdown("""
         <div style="text-align: center; padding: 1rem;">
             <h4>🔄 Dernière Mise à Jour</h4>
-            <p>{}<br>Version: 2.0</p>
+            <p>{}<br>Version: 1.2</p>
         </div>
         """.format(pd.Timestamp.now().strftime("%d/%m/%Y %H:%M")), unsafe_allow_html=True)
 
