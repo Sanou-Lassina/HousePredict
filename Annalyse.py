@@ -227,8 +227,8 @@ def create_horizontal_navigation():
     return st.session_state.analysis_section
 
 def analyze_target_variable(df):
-    """Analyse approfondie de la variable cible SalePrice"""
-    st.markdown("<div class='section-card'><h3>🎯 Analyse Approfondie de la Variable Cible</h3></div>", unsafe_allow_html=True)
+    """Analyse de la variable cible SalePrice"""
+    st.markdown("<div class='section-card'><h3>🎯 Analyse de la Variable Cible</h3></div>", unsafe_allow_html=True)
     
     # Métriques statistiques avancées
     col1, col2, col3, col4 = st.columns(4)
@@ -446,7 +446,7 @@ def advanced_correlation_analysis(df):
     st.plotly_chart(fig, use_container_width=True)
     
     # Analyse détaillée des corrélations avec SalePrice
-    st.subheader("🎯 Analyse Détaillée des Corrélations avec SalePrice")
+    st.subheader("🎯 Analyse des Corrélations avec SalePrice")
     
     sale_price_corr = corr_matrix['SalePrice'].sort_values(ascending=False)
     
@@ -573,48 +573,141 @@ def categorical_analysis(df):
         fig.update_layout(xaxis_title="Prix Moyen ($)", yaxis_title=cat_var)
         st.plotly_chart(fig, use_container_width=True)
 
+
+
+
+
+
 def multivariate_analysis(df):
     """Analyse multivariée avancée"""
     st.markdown("<div class='section-card'><h3>🎭 Analyse Multivariée Avancée</h3></div>", unsafe_allow_html=True)
     
-    numeric_cols = df.select_dtypes(include=['number']).columns
-    categorical_cols = df.select_dtypes(include=['object']).columns
+    # Créer une copie pour éviter les modifications accidentelles
+    df_clean = df.copy()
+    
+    # Filtrer les colonnes numériques avec plus de valeurs uniques
+    numeric_cols = df_clean.select_dtypes(include=['number']).columns
+    categorical_cols = df_clean.select_dtypes(include=['object', 'category']).columns
+    
     seuil = 10
-    numeric_cols_filtered = [col for col in numeric_cols if df[col].nunique() > seuil]
+    numeric_cols_filtered = [col for col in numeric_cols if df_clean[col].nunique() > seuil]
+    
+    # S'assurer que SalePrice est inclus s'il existe
+    target_var = 'SalePrice'
+    if target_var in numeric_cols and target_var not in numeric_cols_filtered:
+        numeric_cols_filtered.append(target_var)
     
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        x_var = st.selectbox("Axe X:", numeric_cols_filtered, index=1, key="multivar_x")
+        x_var = st.selectbox("Axe X:", numeric_cols_filtered, 
+                           index=min(1, len(numeric_cols_filtered)-1), 
+                           key="multivar_x")
     with col2:
-        y_var = st.selectbox("Axe Y:", ['SalePrice'] + numeric_cols_filtered, index=0, key="multivar_y")
+        y_options = [target_var] + [col for col in numeric_cols_filtered if col != target_var]
+        y_var = st.selectbox("Axe Y:", y_options, 
+                           index=0, key="multivar_y")
     with col3:
-        size_var = st.selectbox("Variable taille:", ['Aucune'] + numeric_cols_filtered, key="multivar_size")
+        size_options = ['Aucune'] + numeric_cols_filtered
+        # Retirer les variables déjà sélectionnées pour éviter les conflits
+        size_options = [opt for opt in size_options if opt not in [x_var, y_var] or opt == 'Aucune']
+        size_var = st.selectbox("Variable taille:", size_options, key="multivar_size")
     with col4:
-        color_cat_var = st.selectbox("Variable couleur:", ['Aucune'] + list(categorical_cols), key="multivar_color")
+        color_options = ['Aucune'] + list(categorical_cols)
+        color_cat_var = st.selectbox("Variable couleur:", color_options, key="multivar_color")
     
-    # Scatter plot 3D si possible
-    if size_var != 'Aucune' and color_cat_var != 'Aucune':
-        fig = px.scatter(df, x=x_var, y=y_var, size=size_var, color=color_cat_var,
-                        title=f"Relation {x_var} vs {y_var} - Multidimensionnelle",
-                        hover_data=df.columns[:3].tolist(),
-                        opacity=0.7)
-    elif size_var != 'Aucune':
-        fig = px.scatter(df, x=x_var, y=y_var, size=size_var,
-                        title=f"Relation {x_var} vs {y_var}",
-                        color_discrete_sequence=['#667eea'],
-                        opacity=0.7)
-    elif color_cat_var != 'Aucune':
-        fig = px.scatter(df, x=x_var, y=y_var, color=color_cat_var,
-                        title=f"Relation {x_var} vs {y_var} par {color_cat_var}",
-                        opacity=0.7)
-    else:
-        fig = px.scatter(df, x=x_var, y=y_var,
-                        title=f"Relation {x_var} vs {y_var}",
-                        color_discrete_sequence=['#667eea'],
-                        opacity=0.7)
+    # Préparer les données pour le plot
+    plot_data = df_clean.copy()
     
-    st.plotly_chart(fig, use_container_width=True)
+    # Gérer les valeurs manquantes pour les colonnes sélectionnées
+    cols_to_clean = [x_var, y_var]
+    if size_var != 'Aucune':
+        cols_to_clean.append(size_var)
+    if color_cat_var != 'Aucune':
+        cols_to_clean.append(color_cat_var)
+    
+    # Supprimer les lignes avec NaN dans les colonnes utilisées
+    plot_data = plot_data[cols_to_clean].dropna()
+    
+    # Scatter plot avec gestion des erreurs
+    try:
+        if size_var != 'Aucune' and color_cat_var != 'Aucune':
+            # S'assurer que la variable size est numérique
+            if pd.api.types.is_numeric_dtype(plot_data[size_var]):
+                fig = px.scatter(plot_data, x=x_var, y=y_var, size=size_var, 
+                               color=color_cat_var,
+                               title=f"Relation {x_var} vs {y_var} - Multidimensionnelle",
+                               hover_data=plot_data.columns[:3].tolist(),
+                               opacity=0.7,
+                               color_discrete_sequence=px.colors.qualitative.Set1)
+            else:
+                st.warning(f"La variable '{size_var}' doit être numérique pour l'utiliser comme taille.")
+                fig = px.scatter(plot_data, x=x_var, y=y_var, color=color_cat_var,
+                               title=f"Relation {x_var} vs {y_var} par {color_cat_var}",
+                               opacity=0.7,
+                               color_discrete_sequence=px.colors.qualitative.Set1)
+        
+        elif size_var != 'Aucune':
+            if pd.api.types.is_numeric_dtype(plot_data[size_var]):
+                fig = px.scatter(plot_data, x=x_var, y=y_var, size=size_var,
+                               title=f"Relation {x_var} vs {y_var} (taille: {size_var})",
+                               color_discrete_sequence=['#667eea'],
+                               opacity=0.7)
+            else:
+                st.warning(f"La variable '{size_var}' doit être numérique pour l'utiliser comme taille.")
+                fig = px.scatter(plot_data, x=x_var, y=y_var,
+                               title=f"Relation {x_var} vs {y_var}",
+                               color_discrete_sequence=['#667eea'],
+                               opacity=0.7)
+        
+        elif color_cat_var != 'Aucune':
+            fig = px.scatter(plot_data, x=x_var, y=y_var, color=color_cat_var,
+                           title=f"Relation {x_var} vs {y_var} par {color_cat_var}",
+                           opacity=0.7,
+                           color_discrete_sequence=px.colors.qualitative.Set1)
+        else:
+            fig = px.scatter(plot_data, x=x_var, y=y_var,
+                           title=f"Relation {x_var} vs {y_var}",
+                           color_discrete_sequence=['#667eea'],
+                           opacity=0.7)
+        
+        # Personnaliser le layout
+        fig.update_layout(
+            xaxis_title=x_var,
+            yaxis_title=y_var,
+            hovermode='closest',
+            showlegend=True
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Afficher les informations sur les données utilisées
+        with st.expander("ℹ️ Informations sur les données utilisées"):
+            st.write(f"**Nombre de points affichés :** {len(plot_data)}")
+            st.write(f"**Colonnes utilisées :** {', '.join(cols_to_clean)}")
+            if size_var != 'Aucune':
+                st.write(f"**Variable taille :** {size_var}")
+            if color_cat_var != 'Aucune':
+                st.write(f"**Variable couleur :** {color_cat_var} (catégories : {plot_data[color_cat_var].nunique()})")
+            
+    except Exception as e:
+        st.error(f"Erreur lors de la création du graphique : {str(e)}")
+        st.info("Essayez de sélectionner d'autres variables ou vérifiez les types de données.")
+        
+        # Afficher un graphique simple de secours
+        try:
+            fig = px.scatter(plot_data, x=x_var, y=y_var,
+                           title=f"Relation {x_var} vs {y_var} (version simplifiée)",
+                           color_discrete_sequence=['#667eea'],
+                           opacity=0.7)
+            st.plotly_chart(fig, use_container_width=True)
+        except:
+            st.write("Impossible d'afficher le graphique avec les variables sélectionnées.")
+
+
+
+
+
 
 def temporal_analysis(df):
     """Analyse temporelle avancée"""
