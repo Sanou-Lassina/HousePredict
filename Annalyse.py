@@ -604,17 +604,47 @@ def multivariate_analysis(df):
                            index=min(1, len(numeric_cols_filtered)-1), 
                            key="multivar_x")
     with col2:
-        y_options = [target_var] + [col for col in numeric_cols_filtered if col != target_var]
+        # Filtrer pour exclure la variable X déjà sélectionnée (sauf pour SalePrice)
+        y_options = [target_var] + [col for col in numeric_cols_filtered 
+                                   if col != target_var and col != x_var]
+        if x_var != target_var:
+            y_options = [target_var] + [col for col in numeric_cols_filtered 
+                                       if col != target_var and col != x_var]
+        
         y_var = st.selectbox("Axe Y:", y_options, 
                            index=0, key="multivar_y")
+    
     with col3:
-        size_options = ['Aucune'] + numeric_cols_filtered
-        # Retirer les variables déjà sélectionnées pour éviter les conflits
-        size_options = [opt for opt in size_options if opt not in [x_var, y_var] or opt == 'Aucune']
-        size_var = st.selectbox("Variable taille:", size_options, key="multivar_size")
+        # Exclure les variables déjà sélectionnées pour X et Y
+        size_options = ['Aucune'] + [col for col in numeric_cols_filtered 
+                                    if col not in [x_var, y_var]]
+        size_var = st.selectbox("Variable taille:", size_options, 
+                              index=0, key="multivar_size")
+    
     with col4:
         color_options = ['Aucune'] + list(categorical_cols)
-        color_cat_var = st.selectbox("Variable couleur:", color_options, key="multivar_color")
+        color_cat_var = st.selectbox("Variable couleur:", color_options, 
+                                   key="multivar_color")
+    
+    # VÉRIFICATION : X et Y ne doivent pas être identiques
+    if x_var == y_var:
+        st.error("❌ **Erreur :** Les variables X et Y ne peuvent pas être identiques.")
+        st.info("Veuillez sélectionner des variables différentes pour l'axe X et l'axe Y.")
+        
+        # Afficher un graphique alternatif avec une suggestion
+        st.markdown("**Suggestions :**")
+        st.write(f"- Gardez **{x_var}** sur l'axe X")
+        st.write(f"- Sélectionnez une autre variable pour l'axe Y")
+        
+        # Proposer des alternatives
+        alternative_vars = [col for col in numeric_cols_filtered 
+                          if col != x_var and col != target_var][:5]
+        if alternative_vars:
+            st.write("**Variables suggérées pour Y :**")
+            for var in alternative_vars:
+                st.write(f"  • {var}")
+        
+        return  # Arrêter l'exécution ici
     
     # Préparer les données pour le plot
     plot_data = df_clean.copy()
@@ -629,6 +659,12 @@ def multivariate_analysis(df):
     # Supprimer les lignes avec NaN dans les colonnes utilisées
     plot_data = plot_data[cols_to_clean].dropna()
     
+    # Vérifier si on a suffisamment de données après nettoyage
+    if len(plot_data) == 0:
+        st.warning("⚠️ **Données insuffisantes :** Toutes les lignes ont été supprimées à cause de valeurs manquantes.")
+        st.info("Essayez de sélectionner d'autres variables ou vérifiez les données manquantes.")
+        return
+    
     # Scatter plot avec gestion des erreurs
     try:
         if size_var != 'Aucune' and color_cat_var != 'Aucune':
@@ -637,7 +673,8 @@ def multivariate_analysis(df):
                 fig = px.scatter(plot_data, x=x_var, y=y_var, size=size_var, 
                                color=color_cat_var,
                                title=f"Relation {x_var} vs {y_var} - Multidimensionnelle",
-                               hover_data=plot_data.columns[:3].tolist(),
+                               hover_data=[col for col in plot_data.columns 
+                                         if col not in [x_var, y_var, size_var, color_cat_var]][:3],
                                opacity=0.7,
                                color_discrete_sequence=px.colors.qualitative.Set1)
             else:
