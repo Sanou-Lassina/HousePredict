@@ -549,12 +549,33 @@ def variable_relationship_analysis(df):
     
     # Création du scatter plot
     try:
-        # Préparer les données de survol sans doublons
+        # Préparer les données de survol - SÉLECTION CORRECTE DES COLONNES DISPONIBLES
         hover_cols = []
-        # Ajouter jusqu'à 3 colonnes supplémentaires (en excluant celles déjà utilisées)
-        additional_cols = [col for col in df_clean.columns 
-                          if col not in cols_needed][:3]
-        hover_cols = additional_cols
+        # Récupérer les colonnes disponibles dans plot_data (après dropna)
+        available_cols = plot_data.columns.tolist()
+        
+        # Chercher des colonnes supplémentaires intéressantes à afficher
+        # Limiter à 2 colonnes max pour éviter la surcharge
+        for col in df_clean.columns:
+            # Ne pas inclure les colonnes déjà utilisées
+            if col not in cols_needed:
+                # Vérifier que la colonne existe dans le dataframe d'origine
+                # et qu'elle n'est pas vide
+                if col in df_clean.columns and not df_clean[col].dropna().empty:
+                    # Limiter à certaines colonnes typiquement intéressantes
+                    if col in ['MSSubClass', 'LotArea', 'OverallQual', 'OverallCond', 'YearBuilt', 'Neighborhood']:
+                        hover_cols.append(col)
+                        if len(hover_cols) >= 2:
+                            break
+        
+        # Si pas assez de colonnes spécifiques, en prendre d'autres
+        if len(hover_cols) < 2:
+            for col in df_clean.columns:
+                if col not in cols_needed and col not in hover_cols:
+                    if col in df_clean.columns and not df_clean[col].dropna().empty:
+                        hover_cols.append(col)
+                        if len(hover_cols) >= 2:
+                            break
         
         if color_var != 'Aucune':
             fig = px.scatter(
@@ -641,17 +662,28 @@ def variable_relationship_analysis(df):
     except Exception as e:
         st.error(f"❌ Erreur lors de la création du graphique : {str(e)}")
         
-        # Solution de secours simple
+        # Solution de secours sans message "Tentative de création..."
         try:
-            st.info("Tentative de création d'un graphique simplifié...")
-            fig_simple = px.scatter(
-                plot_data, 
-                x=x_var, 
-                y=y_var,
-                title=f"Relation {x_var} vs {y_var} (version simplifiée)",
-                color_discrete_sequence=['#667eea'],
-                opacity=0.6
-            )
+            # Graphique simple sans hover_data ni trendline
+            if color_var != 'Aucune':
+                fig_simple = px.scatter(
+                    plot_data, 
+                    x=x_var, 
+                    y=y_var, 
+                    color=color_var,
+                    title=f"Relation {x_var} vs {y_var}",
+                    opacity=0.6,
+                    color_discrete_sequence=px.colors.qualitative.Set1
+                )
+            else:
+                fig_simple = px.scatter(
+                    plot_data, 
+                    x=x_var, 
+                    y=y_var,
+                    title=f"Relation {x_var} vs {y_var}",
+                    color_discrete_sequence=['#667eea'],
+                    opacity=0.6
+                )
             
             # Calcul simple de corrélation
             correlation_simple = plot_data[x_var].corr(plot_data[y_var])
@@ -666,10 +698,10 @@ def variable_relationship_analysis(df):
             )
             
             st.plotly_chart(fig_simple, use_container_width=True)
+            st.warning("⚠️ Le graphique a été simplifié pour éviter les erreurs.")
             
-        except Exception as e2:
-            st.error(f"Impossible d'afficher le graphique : {str(e2)}")
-            st.write("Veuillez sélectionner d'autres variables ou vérifier vos données.")
+        except:
+            st.error("Impossible d'afficher le graphique avec les variables sélectionnées.")
 
 
 
