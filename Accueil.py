@@ -480,13 +480,10 @@ def show_homepage():
     st.markdown("""
     <div style='text-align: center; padding: 1rem 0; max-width: 900px; margin: 0 auto;' class='content-animation'>
         <h2 style='color: #1e293b; font-size: 1.8rem; margin-bottom: 1rem;'>
-            Bienvenue sur la Plateforme de Prediction de Prix des Maisons Immobilière
+            Bienvenue sur la Plateforme de Prediction de Prix des Maisons Immobilière HOUSEPREDICT
         </h2>
         <p style='color: #475569; font-size: 1.1rem; line-height: 1.8;'>
-            HousePredict combine l'expertise en intelligence artificielle avec une analyse immobilière sophistiquée 
-            pour offrir des prédictions de prix précises et des insights actionnables. Notre système utilise des 
-            algorithmes de machine learning de pointe pour analyser des milliers de propriétés et identifier 
-            les tendances du marché en temps réel.
+            HousePredict est une plateforme d'analyse prédictive qui vous guide dans l'évaluation immobilière grâce à l'intelligence artificielle. En analysant des milliers de données de propriétés avec des modèles de machine learning sophistiqués, nous générons des estimations éclairées et mettons en lumière les éléments qui impactent la valeur sur le marché actuel, facilitant ainsi vos prises de décision.
         </p>
     </div>
     """, unsafe_allow_html=True)
