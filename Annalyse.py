@@ -473,12 +473,6 @@ def advanced_correlation_analysis(df):
         fig.update_layout(xaxis_title="Coefficient de Corrélation", yaxis_title="Variables")
         st.plotly_chart(fig, use_container_width=True)
 
-
-
-
-
-
-
 def variable_relationship_analysis(df):
     """Analyse des relations entre variables"""
     st.markdown("<div class='section-card'><h3>📊 Analyse des relations entre les variables</h3></div>", unsafe_allow_html=True)
@@ -667,14 +661,6 @@ def variable_relationship_analysis(df):
             except:
                 st.write("⚠️ Impossible d'afficher un graphique avec les variables sélectionnées.")
 
-
-
-
-
-
-
-
-
 def categorical_analysis(df):
     """Analyse approfondie des variables catégorielles"""
     st.markdown("<div class='section-card'><h3>🏘️ Analyse des Variables Catégorielles</h3></div>", unsafe_allow_html=True)
@@ -719,11 +705,6 @@ def categorical_analysis(df):
                     color_continuous_scale='viridis')
         fig.update_layout(xaxis_title="Prix Moyen ($)", yaxis_title=cat_var)
         st.plotly_chart(fig, use_container_width=True)
-
-
-
-
-
 
 def multivariate_analysis(df):
     """Analyse multivariée avancée"""
@@ -887,11 +868,6 @@ def multivariate_analysis(df):
             st.plotly_chart(fig, use_container_width=True)
         except:
             st.write("Impossible d'afficher le graphique avec les variables sélectionnées.")
-
-
-
-
-
 
 def temporal_analysis(df):
     """Analyse temporelle avancée"""
