@@ -483,7 +483,7 @@ def variable_relationship_analysis(df):
     """Analyse des relations entre variables"""
     st.markdown("<div class='section-card'><h3>📊 Analyse des relations entre les variables</h3></div>", unsafe_allow_html=True)
     
-    # Créer une copie du DataFrame pour éviter les modifications
+    # Créer une copie du DataFrame
     df_clean = df.copy()
     
     # Sélection des variables
@@ -491,7 +491,7 @@ def variable_relationship_analysis(df):
     seuil = 10
     numeric_cols_filtered = [col for col in numeric_cols if df_clean[col].nunique() > seuil]
     
-    # S'assurer que SalePrice est dans la liste s'il existe
+    # S'assurer que SalePrice est dans la liste
     target_var = 'SalePrice'
     if target_var in numeric_cols and target_var not in numeric_cols_filtered:
         numeric_cols_filtered.append(target_var)
@@ -504,7 +504,6 @@ def variable_relationship_analysis(df):
     
     with col2:
         st.markdown("<div class='variable-group'><h5>🎯 Variable Cible</h5></div>", unsafe_allow_html=True)
-        # Exclure la variable X déjà sélectionnée
         y_options = [target_var] + [col for col in numeric_cols_filtered 
                                   if col != target_var and col != x_var]
         y_var = st.selectbox("Variable Y:", y_options, index=0, key="rel_y")
@@ -519,64 +518,24 @@ def variable_relationship_analysis(df):
     if x_var == y_var:
         st.error("❌ **Erreur :** Les variables X et Y ne peuvent pas être identiques.")
         st.info("Veuillez sélectionner des variables différentes pour l'analyse.")
-        
-        # Afficher des suggestions
-        st.markdown("**Suggestions :**")
-        alternative_vars = [col for col in numeric_cols_filtered 
-                          if col != x_var and col != target_var][:5]
-        if alternative_vars:
-            st.write("**Variables suggérées pour Y :**")
-            for var in alternative_vars:
-                st.write(f"  • {var}")
         return
     
-    # Préparer les données pour le graphique
-    plot_data = df_clean.copy()
-    
-    # Colonnes à inclure dans le graphique
-    cols_needed = [x_var, y_var]
-    if color_var != 'Aucune':
-        cols_needed.append(color_var)
-    
-    # Supprimer les valeurs manquantes
-    plot_data = plot_data[cols_needed].dropna()
-    
-    # Vérifier qu'il reste des données
-    if len(plot_data) == 0:
-        st.warning("⚠️ **Aucune donnée disponible** après suppression des valeurs manquantes.")
-        st.info("Veuillez sélectionner d'autres variables.")
-        return
-    
-    # Création du scatter plot
+    # Création du graphique SANS hover_data pour éviter les erreurs
     try:
-        # Préparer les données de survol - SÉLECTION CORRECTE DES COLONNES DISPONIBLES
-        hover_cols = []
-        # Récupérer les colonnes disponibles dans plot_data (après dropna)
-        available_cols = plot_data.columns.tolist()
+        # Préparer les colonnes nécessaires
+        cols_needed = [x_var, y_var]
+        if color_var != 'Aucune':
+            cols_needed.append(color_var)
         
-        # Chercher des colonnes supplémentaires intéressantes à afficher
-        # Limiter à 2 colonnes max pour éviter la surcharge
-        for col in df_clean.columns:
-            # Ne pas inclure les colonnes déjà utilisées
-            if col not in cols_needed:
-                # Vérifier que la colonne existe dans le dataframe d'origine
-                # et qu'elle n'est pas vide
-                if col in df_clean.columns and not df_clean[col].dropna().empty:
-                    # Limiter à certaines colonnes typiquement intéressantes
-                    if col in ['MSSubClass', 'LotArea', 'OverallQual', 'OverallCond', 'YearBuilt', 'Neighborhood']:
-                        hover_cols.append(col)
-                        if len(hover_cols) >= 2:
-                            break
+        # Créer le DataFrame pour le graphique
+        plot_data = df_clean[cols_needed].dropna()
         
-        # Si pas assez de colonnes spécifiques, en prendre d'autres
-        if len(hover_cols) < 2:
-            for col in df_clean.columns:
-                if col not in cols_needed and col not in hover_cols:
-                    if col in df_clean.columns and not df_clean[col].dropna().empty:
-                        hover_cols.append(col)
-                        if len(hover_cols) >= 2:
-                            break
+        # Vérifier qu'il reste des données
+        if len(plot_data) == 0:
+            st.warning("⚠️ **Aucune donnée disponible** après suppression des valeurs manquantes.")
+            return
         
+        # Créer le graphique SANS hover_data (solution la plus simple et robuste)
         if color_var != 'Aucune':
             fig = px.scatter(
                 plot_data, 
@@ -586,7 +545,6 @@ def variable_relationship_analysis(df):
                 title=f"Relation {x_var} vs {y_var} par {color_var}",
                 trendline="ols",
                 opacity=0.6,
-                hover_data=hover_cols if hover_cols else None,
                 color_discrete_sequence=px.colors.qualitative.Set1
             )
         else:
@@ -597,11 +555,10 @@ def variable_relationship_analysis(df):
                 title=f"Relation {x_var} vs {y_var}",
                 trendline="ols",
                 color_discrete_sequence=['#667eea'],
-                opacity=0.6,
-                hover_data=hover_cols if hover_cols else None
+                opacity=0.6
             )
         
-        # Calcul des métriques avancées
+        # Calcul des métriques
         correlation = plot_data[x_var].corr(plot_data[y_var])
         r_squared = correlation ** 2
         
@@ -617,7 +574,7 @@ def variable_relationship_analysis(df):
             font=dict(size=12, color="black")
         )
         
-        # Améliorer le layout
+        # Personnaliser le layout
         fig.update_layout(
             xaxis_title=f"{x_var}",
             yaxis_title=f"{y_var}",
@@ -626,82 +583,89 @@ def variable_relationship_analysis(df):
             legend_title_text=color_var if color_var != 'Aucune' else None
         )
         
+        # Afficher le graphique
         st.plotly_chart(fig, use_container_width=True)
         
-        # Informations supplémentaires
-        with st.expander("📈 Métriques détaillées"):
-            col_metrics1, col_metrics2 = st.columns(2)
+        # Afficher des informations supplémentaires
+        with st.expander("📈 Détails de l'analyse"):
+            col_info1, col_info2 = st.columns(2)
             
-            with col_metrics1:
+            with col_info1:
                 st.metric("Corrélation", f"{correlation:.3f}")
                 st.metric("Coefficient de détermination (R²)", f"{r_squared:.3f}")
                 
-                # Interprétation qualitative
+                # Interprétation de la corrélation
                 if abs(correlation) >= 0.8:
-                    corr_strength = "Très forte"
+                    force = "Très forte"
                 elif abs(correlation) >= 0.6:
-                    corr_strength = "Forte"
+                    force = "Forte"
                 elif abs(correlation) >= 0.4:
-                    corr_strength = "Modérée"
+                    force = "Modérée"
                 elif abs(correlation) >= 0.2:
-                    corr_strength = "Faible"
+                    force = "Faible"
                 else:
-                    corr_strength = "Très faible"
+                    force = "Très faible"
                 
-                st.info(f"**Relation :** {corr_strength}")
+                st.info(f"**Intensité de la relation :** {force}")
             
-            with col_metrics2:
-                # Statistiques descriptives
-                st.write("**Statistiques :**")
-                stats_df = plot_data[[x_var, y_var]].describe().round(2)
-                st.dataframe(stats_df, use_container_width=True)
-        
-        # Afficher les informations sur les données utilisées
-        st.info(f"📊 **Données utilisées :** {len(plot_data)} observations (valeurs non-manquantes)")
-        
+            with col_info2:
+                st.write(f"**Nombre d'observations :** {len(plot_data)}")
+                st.write(f"**Variables utilisées :**")
+                st.write(f"- X: {x_var}")
+                st.write(f"- Y: {y_var}")
+                if color_var != 'Aucune':
+                    st.write(f"- Couleur: {color_var}")
+                
+                # Direction de la relation
+                if correlation > 0:
+                    direction = "positive (augmentation conjointe)"
+                elif correlation < 0:
+                    direction = "négative (variation inverse)"
+                else:
+                    direction = "nulle"
+                st.write(f"**Direction :** {direction}")
+    
     except Exception as e:
-        st.error(f"❌ Erreur lors de la création du graphique : {str(e)}")
+        # Version minimaliste en cas d'erreur
+        st.error("❌ Une erreur est survenue lors de l'affichage du graphique.")
         
-        # Solution de secours sans message "Tentative de création..."
+        # Tentative de créer un graphique ultra-simple sans aucun paramètre complexe
         try:
-            # Graphique simple sans hover_data ni trendline
+            # Préparer les données minimales
             if color_var != 'Aucune':
                 fig_simple = px.scatter(
-                    plot_data, 
+                    df_clean, 
                     x=x_var, 
                     y=y_var, 
                     color=color_var,
-                    title=f"Relation {x_var} vs {y_var}",
-                    opacity=0.6,
-                    color_discrete_sequence=px.colors.qualitative.Set1
+                    title=f"Relation {x_var} vs {y_var}"
                 )
             else:
                 fig_simple = px.scatter(
-                    plot_data, 
+                    df_clean, 
                     x=x_var, 
                     y=y_var,
-                    title=f"Relation {x_var} vs {y_var}",
-                    color_discrete_sequence=['#667eea'],
-                    opacity=0.6
+                    title=f"Relation {x_var} vs {y_var}"
                 )
-            
-            # Calcul simple de corrélation
-            correlation_simple = plot_data[x_var].corr(plot_data[y_var])
-            fig_simple.add_annotation(
-                x=0.02, y=0.98,
-                xref="paper", yref="paper",
-                text=f"Corrélation: {correlation_simple:.3f}",
-                showarrow=False,
-                bgcolor="white",
-                bordercolor="black",
-                borderwidth=1
-            )
-            
             st.plotly_chart(fig_simple, use_container_width=True)
-            st.warning("⚠️ Le graphique a été simplifié pour éviter les erreurs.")
             
         except:
-            st.error("Impossible d'afficher le graphique avec les variables sélectionnées.")
+            # Dernière tentative très basique
+            try:
+                import plotly.graph_objects as go
+                fig_basic = go.Figure(data=go.Scatter(
+                    x=df_clean[x_var].dropna(),
+                    y=df_clean[y_var].dropna(),
+                    mode='markers'
+                ))
+                fig_basic.update_layout(
+                    title=f"Relation {x_var} vs {y_var}",
+                    xaxis_title=x_var,
+                    yaxis_title=y_var
+                )
+                st.plotly_chart(fig_basic, use_container_width=True)
+            except:
+                st.write("⚠️ Impossible d'afficher un graphique avec les variables sélectionnées.")
 
 
 
